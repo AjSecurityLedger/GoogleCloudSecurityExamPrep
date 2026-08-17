@@ -26,6 +26,19 @@
 *.sql
 *.sqlite
 
+# Python #
+##########
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Generated governance reports #
+################################
+access-governance/out/
+
 # OS generated files #
 ######################
 .DS_Store

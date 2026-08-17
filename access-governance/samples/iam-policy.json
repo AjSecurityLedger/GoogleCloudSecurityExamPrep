@@ -1,0 +1,114 @@
+{
+  "_comment": "Synthetic IAM allow policies in the shape returned by `gcloud projects get-iam-policy PROJECT --format=json`, bundled per resource. No real identities.",
+  "resources": [
+    {
+      "name": "projects/ajsl-prod-payments",
+      "policy": {
+        "version": 3,
+        "etag": "BwYXm4T1Xk0=",
+        "bindings": [
+          {
+            "role": "roles/owner",
+            "members": [
+              "user:founder@ajsecurityledger.com",
+              "user:breakglass-01@ajsecurityledger.com"
+            ]
+          },
+          {
+            "role": "roles/editor",
+            "members": [
+              "serviceAccount:legacy-deploy@ajsl-prod-payments.iam.gserviceaccount.com",
+              "group:engineering-all@ajsecurityledger.com"
+            ]
+          },
+          {
+            "role": "roles/cloudkms.admin",
+            "members": ["user:dana.ops@ajsecurityledger.com"]
+          },
+          {
+            "role": "roles/bigquery.dataViewer",
+            "members": ["user:dana.ops@ajsecurityledger.com"]
+          },
+          {
+            "role": "roles/storage.objectViewer",
+            "members": ["allUsers"]
+          },
+          {
+            "role": "roles/secretmanager.admin",
+            "members": ["user:sam.contractor@northwind-partners.example"],
+            "condition": {
+              "title": "engagement-window",
+              "description": "Limited to the Q1 payments engagement",
+              "expression": "request.time < timestamp(\"2024-04-01T00:00:00Z\")"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "projects/ajsl-analytics",
+      "policy": {
+        "version": 3,
+        "etag": "BwYXm4T1Zt8=",
+        "bindings": [
+          {
+            "role": "roles/bigquery.dataOwner",
+            "members": [
+              "serviceAccount:data-pipeline@ajsl-analytics.iam.gserviceaccount.com",
+              "deleted:user:former.analyst@ajsecurityledger.com?uid=103948572910"
+            ]
+          },
+          {
+            "role": "roles/bigquery.dataViewer",
+            "members": [
+              "group:analytics-readers@ajsecurityledger.com",
+              "user:rae.analyst@ajsecurityledger.com",
+              "allAuthenticatedUsers"
+            ]
+          },
+          {
+            "role": "roles/iam.securityAdmin",
+            "members": ["user:priya.security@ajsecurityledger.com"],
+            "condition": {
+              "title": "jit-elevation",
+              "expression": "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
+            }
+          },
+          {
+            "role": "roles/logging.admin",
+            "members": ["user:priya.security@ajsecurityledger.com"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "projects/ajsl-shared",
+      "policy": {
+        "version": 3,
+        "etag": "BwYXm4T2Aa0=",
+        "bindings": [
+          {
+            "role": "roles/resourcemanager.projectIamAdmin",
+            "members": [
+              "serviceAccount:terraform-runner@ajsl-shared.iam.gserviceaccount.com"
+            ]
+          },
+          {
+            "role": "roles/logging.viewer",
+            "members": ["group:security-governance@ajsecurityledger.com"]
+          },
+          {
+            "role": "roles/compute.admin",
+            "members": ["user:jules.former@ajsecurityledger.com"]
+          },
+          {
+            "role": "roles/monitoring.viewer",
+            "members": [
+              "serviceAccount:service-482910@compute-system.iam.gserviceaccount.com"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

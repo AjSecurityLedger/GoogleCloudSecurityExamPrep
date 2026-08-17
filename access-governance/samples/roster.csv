@@ -1,0 +1,9 @@
+email,name,department,manager_email,status,employment_type
+founder@ajsecurityledger.com,A. Founder,Executive,board@ajsecurityledger.com,active,employee
+dana.ops@ajsecurityledger.com,Dana Okonkwo,Platform Engineering,platform-lead@ajsecurityledger.com,active,employee
+priya.security@ajsecurityledger.com,Priya Raman,Security,ciso@ajsecurityledger.com,active,employee
+rae.analyst@ajsecurityledger.com,Rae Lindqvist,Data & Analytics,data-eng-lead@ajsecurityledger.com,active,employee
+jules.former@ajsecurityledger.com,Jules Moreau,Platform Engineering,platform-lead@ajsecurityledger.com,terminated,employee
+former.analyst@ajsecurityledger.com,Former Analyst,Data & Analytics,data-eng-lead@ajsecurityledger.com,terminated,employee
+sam.contractor@northwind-partners.example,Sam Devi,Payments (vendor),platform-lead@ajsecurityledger.com,active,contractor
+breakglass-01@ajsecurityledger.com,Break-glass account 01,Security,ciso@ajsecurityledger.com,active,employee

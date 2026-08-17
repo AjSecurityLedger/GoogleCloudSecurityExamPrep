@@ -1,0 +1,129 @@
+# AJ Security Ledger — access governance policy
+#
+# This file is the machine-readable half of the written programme in
+# docs/access-governance-program.md. Anything the analyzers enforce is declared
+# here, so a control change is a reviewable pull request rather than tribal
+# knowledge. Values not set here fall back to the baseline in agp/policy.py.
+
+organization: aj-security-ledger
+
+# Identity domains considered internal. Anything else is a third party and is
+# treated as external access.
+trusted_domains:
+  - ajsecurityledger.com
+  - ajsecurityledger.example
+
+# Broad, unscopable roles. Severity is how seriously we treat each one.
+primitive_roles:
+  roles/owner: CRITICAL
+  roles/editor: HIGH
+  roles/viewer: LOW
+
+# Roles whose holder can change the security posture, read protected data, or
+# alter the audit trail. Reviewed every cycle regardless of who holds them.
+privileged_roles:
+  - roles/iam.securityAdmin
+  - roles/iam.serviceAccountKeyAdmin
+  - roles/iam.serviceAccountTokenCreator
+  - roles/iam.workloadIdentityPoolAdmin
+  - roles/resourcemanager.organizationAdmin
+  - roles/resourcemanager.folderAdmin
+  - roles/resourcemanager.projectIamAdmin
+  - roles/billing.admin
+  - roles/cloudkms.admin
+  - roles/cloudkms.cryptoKeyDecrypter
+  - roles/logging.admin
+  - roles/logging.configWriter
+  - roles/bigquery.dataOwner
+  - roles/storage.admin
+  - roles/secretmanager.admin
+  - roles/compute.admin
+
+# Roles that must never be a standing grant: they carry an expiring IAM
+# condition, or they are issued just-in-time through Privileged Access Manager.
+requires_condition:
+  - roles/owner
+  - roles/iam.securityAdmin
+  - roles/resourcemanager.organizationAdmin
+  - roles/cloudkms.admin
+  - roles/billing.admin
+  - roles/secretmanager.admin
+
+# Role combinations that let one principal complete a sensitive action end to
+# end with nobody else involved.
+sod_conflicts:
+  - name: Key management vs. data read
+    left: [roles/cloudkms.admin, roles/cloudkms.cryptoKeyDecrypter]
+    right: [roles/bigquery.dataViewer, roles/storage.objectViewer, roles/bigquery.dataOwner]
+    rationale: >-
+      A principal holding both the key and the ciphertext can decrypt protected
+      data without a second party.
+  - name: Grant vs. audit
+    left: [roles/iam.securityAdmin, roles/resourcemanager.projectIamAdmin]
+    right: [roles/logging.admin, roles/logging.configWriter]
+    rationale: >-
+      Whoever can grant access must not be able to disable or rewrite the audit
+      trail that records the grant.
+  - name: Secret custody vs. workload identity
+    left: [roles/secretmanager.admin]
+    right: [roles/iam.serviceAccountTokenCreator]
+    rationale: >-
+      Holding both allows a principal to mint credentials for any workload and
+      then read the secrets that workload protects.
+
+# Accounts reserved for emergency use. They are expected to be highly
+# privileged; what matters is that use is short-lived, alerted, and reviewed.
+break_glass:
+  principals:
+    - user:breakglass-01@ajsecurityledger.com
+  max_hours: 8
+
+human_access:
+  # People inherit access from Cloud Identity groups so that leaver automation
+  # has a single control point. Direct bindings are hygiene debt, not incidents.
+  require_group_bindings: true
+  direct_binding_severity: LOW
+
+# Formally accepted exceptions. Every entry needs an owner-approved ticket and
+# an end date — an exception with no end date is an undocumented policy change,
+# so the tooling treats it as expired.
+exemptions:
+  - ticket: SEC-1042
+    rule_id: IAM005
+    principal: serviceAccount:terraform-runner@ajsl-shared.iam.gserviceaccount.com
+    role: roles/resourcemanager.projectIamAdmin
+    resource: "*"
+    expires: "2027-01-31T00:00:00Z"
+    justification: >-
+      Infrastructure-as-code pipeline requires IAM write to reconcile bindings.
+      Compensating controls: no interactive access, Workload Identity Federation
+      only, plans reviewed in pull requests, apply logs shipped to the audit sink.
+
+review:
+  cadence_days: 90
+  default_reviewer: security-governance@ajsecurityledger.com
+  # Every non-human identity needs a named human owner, or its access cannot be
+  # attested to by anyone.
+  service_account_owners:
+    terraform-runner@ajsl-shared.iam.gserviceaccount.com: platform-lead@ajsecurityledger.com
+    data-pipeline@ajsl-analytics.iam.gserviceaccount.com: data-eng-lead@ajsecurityledger.com
+
+privacy:
+  # Categories that raise an asset to the strictest handling requirements.
+  restricted_categories:
+    - special
+    - phi
+    - pci
+    - pii.national_id
+  # Regions personal data may be stored in.
+  allowed_locations:
+    - europe-west1
+    - europe-west4
+    - eu
+  approved_transfer_safeguards:
+    - SCC
+    - adequacy
+    - BCR
+  max_dlp_scan_age_days: 90
+  # Ceiling for any declared retention period, absent a legal hold.
+  max_retention_days: 1825

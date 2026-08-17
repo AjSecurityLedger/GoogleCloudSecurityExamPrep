@@ -1,0 +1,127 @@
+# Synthetic data inventory for AJ Security Ledger.
+#
+# One entry per place personal data comes to rest. The inventory is the control
+# surface for retention, residency, encryption and data subject rights: an asset
+# that is absent here is an asset nobody can make promises about.
+#
+# data_categories use a dotted taxonomy so rules can match on a prefix:
+#   pii.contact, pii.national_id, pii.financial, phi, pci, special, none
+# subject_key names the column or metadata key that ties a record to a person.
+
+assets:
+  - asset_id: bq.payments.transactions
+    name: Payment transactions
+    system: BigQuery
+    owner: data-eng-lead@ajsecurityledger.com
+    environment: prod
+    data_categories: [pii.contact, pii.financial, pci]
+    purpose: Settlement, chargeback handling and fraud investigation
+    legal_basis: Contract (Art. 6(1)(b))
+    retention_days: 2555
+    oldest_record_days: 2610
+    encryption: google-managed
+    location: europe-west1
+    transfers: []
+    transfer_safeguard: ""
+    subject_key: customer_id
+    access_principals:
+      - group:payments-analysts@ajsecurityledger.com
+      - serviceAccount:data-pipeline@ajsl-analytics.iam.gserviceaccount.com
+    last_dlp_scan: "2026-06-02T00:00:00Z"
+
+  - asset_id: gcs.support.attachments
+    name: Customer support attachments
+    system: Cloud Storage
+    owner: support-lead@ajsecurityledger.com
+    environment: prod
+    data_categories: [pii.contact, special]
+    purpose: Resolving customer support tickets
+    legal_basis: Legitimate interest (Art. 6(1)(f))
+    retention_days: 365
+    oldest_record_days: 300
+    encryption: google-managed
+    location: us-central1
+    transfers: [us]
+    transfer_safeguard: ""
+    subject_key: ticket_requester_email
+    access_principals:
+      - group:support-agents@ajsecurityledger.com
+      - user:sam.contractor@northwind-partners.example
+    last_dlp_scan: "2025-01-15T00:00:00Z"
+
+  - asset_id: sql.identity.users
+    name: Identity and account records
+    system: Cloud SQL (PostgreSQL)
+    owner: platform-lead@ajsecurityledger.com
+    environment: prod
+    data_categories: [pii.contact, pii.national_id]
+    purpose: Account creation, authentication and KYC verification
+    legal_basis: Legal obligation (Art. 6(1)(c))
+    retention_days: 1825
+    oldest_record_days: 1200
+    encryption: CMEK
+    location: europe-west4
+    transfers: []
+    transfer_safeguard: ""
+    subject_key: user_id
+    access_principals:
+      - group:identity-oncall@ajsecurityledger.com
+    last_dlp_scan: "2026-07-20T00:00:00Z"
+
+  - asset_id: bq.analytics.events_raw
+    name: Raw product event stream
+    system: BigQuery
+    owner: ""
+    environment: prod
+    data_categories: [pii.contact, pii.device]
+    purpose: Product analytics
+    legal_basis: ""
+    retention_days: null
+    oldest_record_days: 900
+    encryption: google-managed
+    location: europe-west1
+    transfers: []
+    transfer_safeguard: ""
+    subject_key: ""
+    access_principals:
+      - group:analytics-readers@ajsecurityledger.com
+      - allAuthenticatedUsers
+    last_dlp_scan: ""
+
+  - asset_id: gcs.marketing.exports
+    name: Marketing campaign exports
+    system: Cloud Storage
+    owner: marketing-ops@ajsecurityledger.com
+    environment: prod
+    data_categories: [pii.contact]
+    purpose: Campaign delivery and attribution
+    legal_basis: Consent (Art. 6(1)(a))
+    retention_days: 180
+    oldest_record_days: 120
+    encryption: google-managed
+    location: europe-west1
+    transfers: [us]
+    transfer_safeguard: SCC
+    subject_key: subscriber_id
+    access_principals:
+      - group:marketing-ops@ajsecurityledger.com
+    last_dlp_scan: "2026-07-01T00:00:00Z"
+
+  - asset_id: bq.finance.ledger
+    name: General ledger
+    system: BigQuery
+    owner: finance-lead@ajsecurityledger.com
+    environment: prod
+    data_categories: [none]
+    purpose: Statutory financial reporting
+    legal_basis: Legal obligation (Art. 6(1)(c))
+    retention_days: 3650
+    oldest_record_days: 2000
+    encryption: CMEK
+    location: europe-west1
+    transfers: []
+    transfer_safeguard: ""
+    subject_key: ""
+    access_principals:
+      - group:finance-reporting@ajsecurityledger.com
+    last_dlp_scan: "2026-05-11T00:00:00Z"
